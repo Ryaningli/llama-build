@@ -38,7 +38,7 @@ jobs:
             arch: x64
 
     runs-on: ${{ matrix.os }}
-    if: contains(fromJSON('["${{ github.event.inputs.targets }}"]'), matrix.target)
+    if: ${{ contains(fromJSON(format('["{0}"]', github.event.inputs.targets)), matrix.target) }}
 
     steps:
       - name: Clone upstream
