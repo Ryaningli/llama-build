@@ -68,7 +68,6 @@ jobs:
                 -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                 -DGGML_BACKEND_DL=ON \
                 -DGGML_NATIVE=OFF \
-                -DGGML_CPU_ALL_VARIANTS=ON \
                 ${{ env.CMAKE_ARGS }}
               cmake --build build --config Release -j $(nproc)
               echo "=== Build output ==="
