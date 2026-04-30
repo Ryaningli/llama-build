@@ -100,5 +100,5 @@ jobs:
             Legacy build of [llama.cpp ${{ github.event.inputs.upstream_tag }}](https://github.com/ggml-org/llama.cpp/releases/tag/${{ github.event.inputs.upstream_tag }}) for glibc >= 2.31.
 
             **Upstream changelog:** https://github.com/ggml-org/llama.cpp/commits/${{ github.event.inputs.upstream_tag }}
-          draft: true
+          draft: false
           files: artifacts/**/*.tar.gz
