@@ -1,0 +1,76 @@
+name: Build Legacy
+
+on:
+  workflow_dispatch:
+    inputs:
+      upstream_tag:
+        description: 'Upstream release tag to build (e.g. b4050)'
+        required: true
+      targets:
+        description: 'Comma-separated build targets (e.g. ubuntu-arm64,ubuntu-x64)'
+        required: false
+        default: 'ubuntu-arm64'
+
+env:
+  UPSTREAM_REPO: ggml-org/llama.cpp
+  CMAKE_ARGS: >-
+    -DLLAMA_BUILD_EXAMPLES=OFF
+    -DLLAMA_BUILD_TESTS=OFF
+    -DLLAMA_BUILD_TOOLS=ON
+    -DLLAMA_BUILD_SERVER=ON
+    -DGGML_RPC=ON
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - target: ubuntu-arm64
+            os: ubuntu-24.04-arm
+            container: ubuntu:20.04
+            arch: arm64
+          - target: ubuntu-x64
+            os: ubuntu-latest
+            container: ubuntu:20.04
+            arch: x64
+
+    runs-on: ${{ matrix.os }}
+    if: contains(fromJSON('["${{ github.event.inputs.targets }}"]'), matrix.target)
+
+    steps:
+      - name: Clone upstream
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.UPSTREAM_REPO }}
+          ref: ${{ github.event.inputs.upstream_tag }}
+
+      - name: Build in legacy container
+        run: |
+          docker run --rm \
+            -v "$(pwd):/workspace" \
+            -w /workspace \
+            ${{ matrix.container }} \
+            bash -c '
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update
+              apt-get install -y build-essential cmake git libssl-dev
+              cmake -B build \
+                -DCMAKE_INSTALL_RPATH="$ORIGIN" \
+                -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
+                -DGGML_BACKEND_DL=ON \
+                -DGGML_NATIVE=OFF \
+                -DGGML_CPU_ALL_VARIANTS=ON \
+                -DLLAMA_FATAL_WARNINGS=ON \
+                ${{ env.CMAKE_ARGS }}
+              cmake --build build --config Release -j $(nproc)
+              cp LICENSE build/bin/
+              tar -czvf /workspace/llama-${{ github.event.inputs.upstream_tag }}-bin-ubuntu-${{ matrix.arch }}.tar.gz \
+                --transform "s,./,llama-${{ github.event.inputs.upstream_tag }}/," \
+                -C build/bin .
+            '
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: llama-${{ github.event.inputs.upstream_tag }}-bin-ubuntu-${{ matrix.arch }}
+          path: llama-${{ github.event.inputs.upstream_tag }}-bin-ubuntu-${{ matrix.arch }}.tar.gz
