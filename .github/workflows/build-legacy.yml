@@ -9,7 +9,7 @@ on:
       targets:
         description: 'Comma-separated build targets (e.g. ubuntu-arm64,ubuntu-x64)'
         required: false
-        default: 'ubuntu-arm64'
+        default: 'ubuntu-arm64,ubuntu-x64'
 
 permissions:
   contents: write
