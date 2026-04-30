@@ -57,12 +57,15 @@ jobs:
               set -euo pipefail
               export DEBIAN_FRONTEND=noninteractive
               apt-get update
-              apt-get install -y build-essential cmake git libssl-dev
+              apt-get install -y build-essential cmake git libssl-dev gcc-12 g++-12
+              export CC=gcc-12
+              export CXX=g++-12
               cmake -B build \
                 -DCMAKE_INSTALL_RPATH='$ORIGIN' \
                 -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
                 -DGGML_BACKEND_DL=ON \
                 -DGGML_NATIVE=OFF \
+                -DGGML_CPU_ALL_VARIANTS=ON \
                 -DLLAMA_FATAL_WARNINGS=ON \
                 ${{ env.CMAKE_ARGS }}
               cmake --build build --config Release -j $(nproc)
