@@ -74,3 +74,22 @@ jobs:
         with:
           name: llama-${{ github.event.inputs.upstream_tag }}-bin-ubuntu-${{ matrix.arch }}
           path: llama-${{ github.event.inputs.upstream_tag }}-bin-ubuntu-${{ matrix.arch }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+          merge-multiple: false
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.upstream_tag }}
+          name: "llama.cpp ${{ github.event.inputs.upstream_tag }} (legacy build)"
+          draft: true
+          generate_release_notes: true
+          files: artifacts/**/*.tar.gz
