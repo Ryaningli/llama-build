@@ -54,6 +54,7 @@ jobs:
             -w /workspace \
             ${{ matrix.container }} \
             bash -c '
+              set -euo pipefail
               export DEBIAN_FRONTEND=noninteractive
               apt-get update
               apt-get install -y build-essential cmake git libssl-dev
@@ -66,6 +67,10 @@ jobs:
                 -DLLAMA_FATAL_WARNINGS=ON \
                 ${{ env.CMAKE_ARGS }}
               cmake --build build --config Release -j $(nproc)
+              echo "=== Build output ==="
+              ls -lh build/bin/
+              test -f build/bin/llama-server || { echo "ERROR: llama-server not found"; exit 1; }
+              test -f build/bin/llama-cli || { echo "ERROR: llama-cli not found"; exit 1; }
               cp LICENSE build/bin/
               tar -czvf /workspace/llama-${{ github.event.inputs.upstream_tag }}-bin-ubuntu-${{ matrix.arch }}.tar.gz \
                 --transform "s,./,llama-${{ github.event.inputs.upstream_tag }}/," \
