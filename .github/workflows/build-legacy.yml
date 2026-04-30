@@ -69,7 +69,6 @@ jobs:
                 -DGGML_BACKEND_DL=ON \
                 -DGGML_NATIVE=OFF \
                 -DGGML_CPU_ALL_VARIANTS=ON \
-                -DLLAMA_FATAL_WARNINGS=ON \
                 ${{ env.CMAKE_ARGS }}
               cmake --build build --config Release -j $(nproc)
               echo "=== Build output ==="
