@@ -11,6 +11,9 @@ on:
         required: false
         default: 'ubuntu-arm64'
 
+permissions:
+  contents: write
+
 env:
   UPSTREAM_REPO: ggml-org/llama.cpp
   CMAKE_ARGS: >-
